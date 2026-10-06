@@ -1,0 +1,219 @@
+:root {
+  color: #172026;
+  background: #dfe5e8;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  font-size: 16px;
+  line-height: 1.4;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  min-height: 34px;
+  border: 1px solid #9ca8af;
+  border-radius: 6px;
+  padding: 0 12px;
+  color: #172026;
+  background: #f7f9fa;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #ffffff;
+  border-color: #596873;
+}
+
+button.active {
+  color: #ffffff;
+  background: #245b8f;
+  border-color: #245b8f;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  width: 100%;
+  height: 100%;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 64px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #b7c0c6;
+  background: #edf1f3;
+}
+
+.brand {
+  display: grid;
+  min-width: 190px;
+  margin-right: 4px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.runtime {
+  color: #58666f;
+  font-size: 12px;
+}
+
+.control-group,
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.color-field,
+.range-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #31424d;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.color-field input {
+  width: 36px;
+  height: 34px;
+  border: 1px solid #9ca8af;
+  border-radius: 6px;
+  padding: 2px;
+  background: #ffffff;
+}
+
+.range-field input {
+  width: 130px;
+  accent-color: #245b8f;
+}
+
+.range-field output {
+  min-width: 24px;
+  color: #172026;
+  font-variant-numeric: tabular-nums;
+}
+
+.actions {
+  margin-left: auto;
+}
+
+.work-area {
+  display: flex;
+  gap: 14px;
+  min-height: 0;
+  padding: 14px;
+  background: #cbd4d9;
+}
+
+.canvas-host {
+  flex: 1;
+  min-width: 0;
+}
+
+.metadata-panel {
+  width: 300px;
+  overflow-y: auto;
+  border: 1px solid #7f8d96;
+  border-radius: 6px;
+  padding: 10px;
+  background: #f7f9fa;
+}
+
+.metadata-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.metadata-panel table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.metadata-panel th {
+  text-align: left;
+  color: #58666f;
+  font-size: 12px;
+  padding: 2px;
+}
+
+.metadata-panel td {
+  padding: 2px;
+}
+
+.metadata-panel input {
+  width: 100%;
+  min-height: 30px;
+  border: 1px solid #9ca8af;
+  border-radius: 4px;
+  padding: 0 6px;
+  background: #ffffff;
+}
+
+.metadata-panel td button {
+  min-height: 30px;
+  padding: 0 8px;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 1px solid #7f8d96;
+  background: #ffffff;
+  cursor: crosshair;
+}
+
+.status-bar {
+  min-height: 30px;
+  padding: 5px 14px;
+  overflow: hidden;
+  border-top: 1px solid #b7c0c6;
+  color: #31424d;
+  background: #edf1f3;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 860px) {
+  .toolbar {
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .brand {
+    min-width: 100%;
+  }
+
+  .actions {
+    margin-left: 0;
+  }
+}

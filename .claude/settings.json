@@ -1,0 +1,20 @@
+{
+  "model": "claude-fable-5",
+  "autoMemoryEnabled": false,
+  "env": {
+    "CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL": "1"
+  },
+  "permissions": {
+    "defaultMode": "bypassPermissions",
+    "allow": [
+      "Edit(//workspaces/survey_gui/**)"
+    ],
+    "deny": [
+      "Edit(//workspaces/survey_gui/.claude/**)"
+    ]
+  },
+  "sandbox": {
+    "enabled": false
+  },
+  "hooks": {}
+}

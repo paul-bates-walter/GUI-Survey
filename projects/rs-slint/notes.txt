@@ -1,0 +1,120 @@
+slint-rs — Desktop PNG editor (Rust + Slint)
+============================================
+
+Language/toolkit: Rust (edition 2021), Slint 1.x (declarative .slint UI compiled
+by slint-build; default backend winit + femtovg/OpenGL, with a built-in software
+renderer fallback).
+Extra crates: rfd (native file dialogs), image (PNG decode -> RGBA8),
+png (tEXt chunk read/write + PNG encode).
+
+Design: the UI is declared in ui/app.slint. State lives in a plain `AppState`
+record behind Rc<RefCell<>>, and the Slint callbacks are wired with free
+functions + closures (no app "object"), matching the repo's functional style.
+The picture is an RGBA8 byte buffer that is the single source of truth; shapes
+are blended into it by a small software rasterizer (src/raster.rs) and shown via
+a Slint `Image`. A `TouchArea` over the image reports pointer events in
+image-pixel coordinates. src/raster.rs and src/pngio.rs are shared verbatim with
+the iced-rs implementation.
+
+Hot-reload split (see "Hot swapping" below): the app is one Cargo package with
+two targets. src/lib.rs is the whole app (model, callback logic, the generated
+UI via slint::include_modules!) built as an rlib + a dylib; its `install`
+function wires every UI callback onto a window. src/main.rs is a thin host that
+creates the `AppWindow` + `AppState`, calls the dylib's `install`, and re-calls
+it whenever the dylib is rebuilt — replacing the callbacks on the live window.
+Because the window and models are host-owned, the picture and form survive.
+
+BUILD TIME
+----------
+Setup (idempotent):        scripts/config.sh
+Build (host, release):     scripts/build.sh            # or: scripts/build.sh debug
+Run:                       scripts/run.sh
+Package (host):            scripts/package.sh
+Dev live-reload:           scripts/watch.sh            # watches src/ and ui/
+Clean:                     scripts/clean.sh
+
+config.sh installs: the Rust toolchain (rustup), build-essential, pkg-config,
+cmake, the winit/femtovg (OpenGL) runtime stack — X11 + Wayland dev libs,
+libxkbcommon, GL/EGL + Mesa drivers, fontconfig/freetype — plus dpkg-dev and
+inotify-tools (Linux/apt); cmake + create-dmg (macOS/Homebrew). It also installs
+cargo-watch for live-reload.
+
+Build outputs land under:
+  target/                                    cargo build tree (intermediate)
+  build/linux-png-editor-slint-<arch>.deb    distributable (from package.sh)
+  build/macos-png-editor-slint-<arch>.dmg    distributable (from package.sh)
+
+RUN TIME
+--------
+Runtime dependency: a display server (X11/Wayland) and, for the default
+renderer, an OpenGL/EGL stack. Where GL is unavailable, force Slint's built-in
+software renderer:
+    SLINT_BACKEND=winit-software ./png-editor-slint
+The binary is otherwise self-contained (Rust statically links its crates).
+
+FEATURE COVERAGE (spec.md)
+--------------------------
+- 2D canvas drawing: circle (2 clicks: center, then radius), rectangle (2 clicks:
+  opposite corners), path (freehand: pen down on press, up on release). Two-click
+  shapes show a live preview that follows the cursor. Pen color (dropdown) and
+  pen radius (slider) are user-configurable in the toolbar.
+                                                        [ui/app.slint, src/raster.rs]
+- Filesystem: open/save .png via native dialogs (rfd, blocking). Pixels decoded
+  through the `image` crate, encoded through `png`.     [src/pngio.rs, src/main.rs]
+- Forms / text editing: an editable Keyword/Value list (Slint ListView of
+  LineEdits) for PNG tEXt metadata, read on open and written on save. Save
+  rebuilds the file from scratch, so deleted keys are not re-emitted. Compressed
+  zTXt / iTXt chunks are read too.                      [src/pngio.rs, ui/app.slint]
+- Hot swapping: genuine in-process hot reload (spec.md: the running app is
+  patched, not restarted). The app logic + UI is a dylib (src/lib.rs); the host
+  (src/main.rs) dlopen's it and a repeating slint::Timer (200ms) polls the .so's
+  mtime, reloading it when scripts/watch.sh rebuilds it (`cargo build --lib`) and
+  re-running `install` to swap the window's callback closures for the new code.
+  Old dylibs are never unloaded (Slint holds closures pointing into them), so the
+  mappings are retained (a little address space per reload, dev-only). The window
+  and models are host-owned, so an edit to src/*.rs or ui/app.slint appears in the
+  live window with the picture, tool, pen, and metadata preserved — no relaunch.
+  Workflow: scripts/run.sh in one terminal, scripts/watch.sh in another.
+  (Adding/removing an AppState field needs a restart — the one limit.)
+                                                        [src/main.rs, src/lib.rs]
+
+RUNTIME TARGETS / DISTRIBUTABLES (spec Feature: Runtime)
+-------------------------------------------------------
+package.sh emits the host-platform installer:
+  Linux  -> DEB       (dpkg-deb; staged .desktop + binary)
+  macOS  -> .app + DMG (create-dmg, else hdiutil)
+The build is host/native. Producing all six OS x arch distributables requires
+building on (or cross-compiling for) each target:
+  - windows-x86_64 / windows-arm64 (.exe): build with the MSVC toolchain
+    (cargo build --release --target {x86_64,aarch64}-pc-windows-msvc); wrap with
+    an installer (WiX/NSIS) or ship the .exe. Not scripted here.
+  - macos-x86_64 / macos-arm64 (.dmg, signed+notarized): build on macOS, then
+    codesign + notarytool + stapler. Signing/notarization need Apple Developer
+    credentials and cannot be done in the Linux container (see the codesign
+    comment in package.sh).
+  - linux-arm64: build on arm64 (or an arm64 cross toolchain).
+This container can natively produce only linux-<host arch>.
+
+VERIFICATION STATUS
+-------------------
+Built and verified in this container (rust + system libs installed by a human
+via config.sh, over the network per repo rules):
+  - scripts/build.sh: debug + release both compile clean (Slint 1.17.1), first try.
+  - cargo test: tests/roundtrip.rs passes — rasterize a disc, save a PNG with
+    tEXt, reload, and confirm pixels + metadata survive, plus that deleted
+    metadata keys are not re-emitted.
+  - Launch: the app runs with the software renderer
+    (SLINT_BACKEND=winit-software). The default femtovg/OpenGL backend exits at
+    startup here because this container exposes Vulkan (used by the iced-rs impl)
+    but no working GL/EGL surface — an environment limitation, not an app bug; on
+    a normal desktop the GL backend is used.
+  - scripts/package.sh: produces build/linux-png-editor-slint-x86_64.deb (binary
+    under /usr/bin + a .desktop entry).
+  - Hot reload: the split builds clean (bin + rlib + dylib), the dylib exports
+    `hot_install`, and the host links the rlib (self-contained, no runtime .so
+    dependency); `cargo build --lib` rebuilds the dylib in ~4s. The reload
+    mechanism is the same one verified headlessly in the iced-rs impl (dlopen +
+    symbol swap + retained libraries), but exercising the *live* reload here would
+    need a display: Slint has to open a window (AppWindow::new), which fails in
+    this headless container just like a normal launch does (see the launch note
+    above). On a desktop, scripts/run.sh + scripts/watch.sh give in-process reload.

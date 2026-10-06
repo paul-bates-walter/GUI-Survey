@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AssemblyName>png-editor-avalonia</AssemblyName>
+    <RootNamespace>AvaloniaPngEditor</RootNamespace>
+    <AvaloniaVersion>11.2.1</AvaloniaVersion>
+    <!-- Distributable targets (spec Feature: Runtime). Restore/publish per RID. -->
+    <RuntimeIdentifiers>win-x64;win-arm64;osx-x64;osx-arm64;linux-x64;linux-arm64</RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <!-- Keep build outputs out of the compile graph. -->
+  <ItemGroup>
+    <Compile Remove="build/**" />
+    <AvaloniaResource Remove="build/**" />
+    <EmbeddedResource Remove="build/**" />
+    <None Remove="build/**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
+    <PackageReference Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
+    <!-- Dev-only diagnostics (F12 inspector); excluded from Release. -->
+    <PackageReference Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)"
+                      Condition="'$(Configuration)' == 'Debug'" />
+  </ItemGroup>
+
+</Project>

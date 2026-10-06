@@ -1,0 +1,9 @@
+name: *-rs {
+  The Rust trait system is an abomination and pretty much 
+  ruins the project. 
+}
+name: raylib-c {
+  lacks live reloading / hot swapping ?
+  working with C and CMake in VS Code kind of painful...
+}
+

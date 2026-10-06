@@ -1,0 +1,22 @@
+{
+  "name": "gui-survey-electron-vite-svelte",
+  "productName": "GUI Survey Electron Vite Svelte",
+  "version": "0.1.0",
+  "description": "Survey PNG editor (Electron + Vite + Svelte)",
+  "private": true,
+  "type": "module",
+  "main": ".vite/build/main.js",
+  "scripts": {
+    "typecheck": "svelte-check --tsconfig ./tsconfig.json && tsc --noEmit"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^7.1.2",
+    "@tsconfig/svelte": "^5.0.8",
+    "@types/node": "^25.9.1",
+    "electron": "^42.3.0",
+    "svelte": "^5.55.9",
+    "svelte-check": "^4.4.8",
+    "typescript": "~6.0.3",
+    "vite": "^8.0.14"
+  }
+}

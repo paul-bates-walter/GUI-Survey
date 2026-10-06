@@ -1,0 +1,44 @@
+iced-rs — Desktop PNG editor (iced 0.13, Rust)
+==============================================
+
+Language/toolkit: Rust, iced 0.13 (wgpu/tiny-skia renderer), rfd file
+dialogs, png crate for decode/encode, hand-rolled tEXt chunk handling
+(src/pngio.rs). The app is split into a bin (src/main.rs) + dylib
+(src/lib.rs) for genuine hot reload via libloading.
+
+BUILD TIME
+----------
+Setup (network, apt):      scripts/config_linux.sh | config_macos.sh
+Build:                     scripts/build.sh [debug|release]
+Run:                       scripts/run.sh
+Hot-reload watcher:        scripts/watch.sh  (rebuilds only the dylib)
+Package (host):            scripts/package.sh -> build/linux-png-editor-iced-<arch>.deb
+Clean:                     scripts/clean.sh
+
+RUN TIME
+--------
+Runtime deps: X11/Wayland display with Vulkan or GL (wgpu). Dev runs need
+the same; headless CI needs a virtual display + software GL/Vulkan.
+
+FEATURE COVERAGE (spec.md)
+--------------------------
+- Canvas: circle / rectangle (two-click with rubber-band preview), path
+  (freehand). Pen color + radius configurable.  [src/canvas.rs, src/lib.rs]
+- Filesystem: open/save .png via rfd dialogs.   [src/lib.rs, src/pngio.rs]
+- tEXt metadata: editable key/value form, chunks spliced into the encoded
+  stream, save rebuilds chunk set.              [src/pngio.rs]
+- Hot swapping: genuine in-process reload. main.rs hosts iced and dlopens
+  the app dylib; scripts/watch.sh rebuilds `--lib` on save and the running
+  process swaps update/view/title fns, preserving State. [src/main.rs]
+
+STATUS
+------
+2026-07-27: the "does not work" state was just missing use statements in
+src/main.rs; fixed. cargo check clean, tests/roundtrip.rs passes (2 tests),
+package.sh verified -> build/linux-png-editor-iced-x86_64.deb.
+
+RUNTIME TARGETS / DISTRIBUTABLES
+--------------------------------
+Host-native builds only. Linux .deb verified here. Windows .exe and macOS
+.dmg (codesign + notarytool need Apple credentials) must be built on their
+own hosts; package.sh contains the macOS bundle path.

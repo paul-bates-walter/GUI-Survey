@@ -1,0 +1,12 @@
+{
+  "name": "gui_survey",
+  "private": true,
+  "scripts": {
+    "codex": "codex --cd . --sandbox workspace-write --ask-for-approval on-request --search",
+    "codex:auto": "codex --cd . --dangerously-bypass-approvals-and-sandbox --search"
+  },
+  "devDependencies": {
+    "@google/gemini-cli": "^0.43.0",
+    "@openai/codex": ">=0.141.0"
+  }
+}

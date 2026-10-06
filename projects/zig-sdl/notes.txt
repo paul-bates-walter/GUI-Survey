@@ -1,0 +1,53 @@
+sdl-zig — Desktop PNG editor (SDL3 + Zig)
+=========================================
+
+Language/toolkit: Zig 0.13, SDL3 (window/input/render/native file dialogs)
+and SDL3_image (PNG load/save). UI text uses SDL_RenderDebugText (SDL 3.2+).
+Hand-rolled PNG tEXt codec in src/png_text.zig (crc32 included).
+
+BUILD TIME
+----------
+Setup (network):        scripts/config_linux.sh | config_macos.sh
+    Linux: installs zig 0.13 to /opt/zig, builds SDL3 3.2.18 and
+    SDL3_image 3.2.4 from source into /opt/sdl3 (no Ubuntu 22.04 apt
+    packages exist for SDL3). macOS: brew install zig sdl3 sdl3_image.
+Build:                  scripts/build.sh [release|debug]
+Run:                    scripts/run.sh
+Watch:                  scripts/watch.sh  (rebuild + relaunch; no
+                        in-process reload for compiled zig)
+Package (Linux):        scripts/package.sh -> build/linux-png-editor-sdl-zig-<arch>.deb
+Clean:                  scripts/clean.sh
+
+Scripts export PKG_CONFIG_PATH/LD_LIBRARY_PATH for /opt/sdl3
+(scripts/_sdl-env.sh).
+
+RUN TIME
+--------
+Runtime deps: X11/Wayland display. The deb bundles libSDL3/libSDL3_image
+under /usr/lib/png-editor-sdl-zig with a wrapper script in /usr/bin, so
+end users do not need SDL3 installed.
+
+FEATURE COVERAGE (spec.md)
+--------------------------
+- Canvas: circle / rectangle (two-click), path (freehand). Color keys
+  R/G/B/K, radius [ ].                                  [src/main.zig]
+- Filesystem: open/save .png via SDL_ShowOpen/SaveFileDialog + SDL3_image.
+- tEXt metadata: editable key/value panel (click to focus, SDL text
+  input, Backspace/Tab/Enter/Esc, x deletes, Add appends; canvas
+  shortcuts suppressed while editing). Chunks spliced after IMG_SavePNG,
+  parsed on load; save rebuilds the chunk set. Codec round-trip tested
+  standalone (crc verified against zlib.crc32).         [src/png_text.zig]
+- Hot swapping: rebuild + relaunch only (scripts/watch.sh).
+
+STATUS
+------
+2026-07-27: fixed pre-existing SDL 3.2.18 API mismatches (dialog callback
+filelist is now `[*c]const [*c]const u8`; SDL_RenderPresent returns bool).
+Release build + deb verified here (x86_64). GUI not exercised (no display
+in container).
+
+RUNTIME TARGETS / DISTRIBUTABLES
+--------------------------------
+Linux .deb verified. Windows/macOS need their own hosts (zig can
+cross-compile the app but SDL3/SDL3_image libs must come from the target
+platform; macOS signing/notarization needs Apple credentials).

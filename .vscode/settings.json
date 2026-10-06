@@ -1,0 +1,45 @@
+{
+  "cmake.sourceDirectory": [
+    "${workspaceFolder}/projects/qt-cpp"
+  ],
+
+  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+  "C_Cpp.default.cStandard": "c23",
+
+  "editor.minimap.enabled": false,
+  "editor.insertSpaces": true,
+  "editor.tabSize": 2,
+  "editor.inlayHints.enabled": "offUnlessPressed",
+
+  "extensions.ignoreRecommendations": false,
+
+  "git.openRepositoryInParentFolders": "never",
+
+  "[rust]": {
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "always",
+      "source.addMissingImports": "always",
+      "source.removeUnusedImports": "always",
+      "source.sortImports": "always",
+    }
+  },
+  "rust-analyzer.linkedProjects": [
+    "./projects/rs-egui/Cargo.toml",
+    "./projects/rs-iced/Cargo.toml",
+    "./projects/rs-slint/Cargo.toml",
+  ],
+  "rust-analyzer.inlayHints.enable": false,
+  "rust-analyzer.diagnostics.disabled": ["unused-variables", "unused_variables", "incorrect-ident-case", "non_upper_case_globals", "non_snake_case", "non_camel_case_types"],
+  "rust-analyzer.check.extraEnv": { "RUSTFLAGS": "-A dead_code -A nonstandard_style" },
+  "rust-analyzer.cargo.targetDir": true,
+  "rust-analyzer.imports.granularity.group": "crate",
+  "rust-analyzer.imports.prefix": "crate",
+
+  "telemetry.editStats.enabled": false,
+  "telemetry.feedback.enabled": false,
+  "telemetry.telemetryLevel": "off",
+
+  "window.menuBarVisibility": "compact",
+
+  "workbench.statusBar.visible": false,
+}

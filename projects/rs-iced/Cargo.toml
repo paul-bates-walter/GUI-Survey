@@ -1,0 +1,21 @@
+package.name = "png-editor-iced"
+package.version = "0.1.0"
+package.edition = "2021"
+package.description = "Desktop PNG editor built with the iced GUI toolkit (Rust)"
+
+bin = [
+  { name = "png-editor-iced", path = "design/main.rs" }
+]
+
+lib.name = "png_editor_iced"
+lib.path = "design/lib.rs"
+lib.crate-type = ["rlib", "dylib"]
+
+dependencies.libloading = "0.8"
+dependencies.iced = { version = "0.13", features = ["canvas", "image", "tokio"] }
+dependencies.rfd = "0.15"
+dependencies.image = { version = "0.25", default-features = false, features = ["png"] }
+dependencies.png = "0.17"
+
+profile.release.opt-level = 2
+profile.release.strip = true

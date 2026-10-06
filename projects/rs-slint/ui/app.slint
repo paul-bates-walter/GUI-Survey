@@ -1,0 +1,138 @@
+import { Button, ComboBox, Slider, LineEdit, ScrollView, ListView, HorizontalBox, VerticalBox } from "std-widgets.slint";
+
+// One editable PNG tEXt entry.
+export struct MetaRow {
+    key: string,
+    value: string,
+}
+
+export component AppWindow inherits Window {
+    title: root.title-text;
+    preferred-width: 1100px;
+    preferred-height: 720px;
+
+    // --- Inputs driven from Rust ------------------------------------------
+    in property <image> image;
+    in property <int> img-width: 800;
+    in property <int> img-height: 600;
+    in property <string> status-text: "";
+    in property <string> title-text: "PNG Editor — slint";
+    in property <[MetaRow]> metadata;
+    // Two-way so the widgets and Rust agree on the current tool.
+    in-out property <float> pen-radius: 6;
+    in-out property <int> mode-index: 2;
+    in-out property <int> pen-index: 0;
+
+    // --- Events out to Rust (coordinates in image pixels) -----------------
+    callback pointer-down(float, float);
+    callback pointer-move(float, float);
+    callback pointer-up(float, float);
+    callback new-canvas();
+    callback clear-canvas();
+    callback open-file();
+    callback save-file();
+    callback save-as-file();
+    callback mode-changed(int);
+    callback pen-changed(int);
+    callback radius-changed(float);
+    callback meta-key-changed(int, string);
+    callback meta-value-changed(int, string);
+    callback meta-add();
+    callback meta-remove(int);
+
+    VerticalBox {
+        // Toolbar.
+        HorizontalBox {
+            alignment: start;
+            Button { text: "New"; clicked => { root.new-canvas(); } }
+            Button { text: "Open"; clicked => { root.open-file(); } }
+            Button { text: "Save"; clicked => { root.save-file(); } }
+            Button { text: "Save As"; clicked => { root.save-as-file(); } }
+            Button { text: "Clear"; clicked => { root.clear-canvas(); } }
+            Text { text: "Mode:"; vertical-alignment: center; }
+            ComboBox {
+                model: ["Circle", "Rectangle", "Path (freehand)"];
+                current-index <=> root.mode-index;
+                selected => { root.mode-changed(self.current-index); }
+            }
+            Text { text: "Pen:"; vertical-alignment: center; }
+            ComboBox {
+                model: ["Black", "White", "Red", "Green", "Blue", "Yellow", "Cyan", "Magenta"];
+                current-index <=> root.pen-index;
+                selected => { root.pen-changed(self.current-index); }
+            }
+            Text { text: "Size:"; vertical-alignment: center; }
+            Slider {
+                minimum: 1;
+                maximum: 64;
+                value: root.pen-radius;
+                width: 140px;
+                changed(v) => { root.radius-changed(v); }
+            }
+        }
+
+        // Body: drawing surface + metadata form.
+        HorizontalBox {
+            ScrollView {
+                horizontal-stretch: 3;
+                Rectangle {
+                    width: root.img-width * 1px;
+                    height: root.img-height * 1px;
+                    Image {
+                        width: 100%;
+                        height: 100%;
+                        source: root.image;
+                        image-rendering: pixelated;
+                    }
+                    TouchArea {
+                        pointer-event(ev) => {
+                            if (ev.kind == PointerEventKind.down) {
+                                root.pointer-down(self.mouse-x / 1px, self.mouse-y / 1px);
+                            }
+                            if (ev.kind == PointerEventKind.up) {
+                                root.pointer-up(self.mouse-x / 1px, self.mouse-y / 1px);
+                            }
+                            if (ev.kind == PointerEventKind.move) {
+                                root.pointer-move(self.mouse-x / 1px, self.mouse-y / 1px);
+                            }
+                        }
+                    }
+                }
+            }
+
+            VerticalBox {
+                horizontal-stretch: 1;
+                min-width: 260px;
+                HorizontalBox {
+                    Text { text: "PNG tEXt metadata"; font-size: 15px; vertical-alignment: center; }
+                    Rectangle { horizontal-stretch: 1; }
+                    Button { text: "+ Add"; clicked => { root.meta-add(); } }
+                }
+                ListView {
+                    for row[idx] in root.metadata: Rectangle {
+                        height: 66px;
+                        VerticalBox {
+                            padding: 2px;
+                            HorizontalBox {
+                                padding: 0;
+                                LineEdit {
+                                    placeholder-text: "Keyword";
+                                    text: row.key;
+                                    edited(t) => { root.meta-key-changed(idx, t); }
+                                }
+                                Button { text: "✕"; width: 40px; clicked => { root.meta-remove(idx); } }
+                            }
+                            LineEdit {
+                                placeholder-text: "Value";
+                                text: row.value;
+                                edited(t) => { root.meta-value-changed(idx, t); }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Text { text: root.status-text; }
+    }
+}

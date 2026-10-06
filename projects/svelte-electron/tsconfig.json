@@ -1,0 +1,18 @@
+{
+  "extends": "@tsconfig/svelte/tsconfig.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "allowSyntheticDefaultImports": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "ES2022",
+    "types": ["node", "svelte"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.svelte", "*.config.ts", "scripts/**/*.ts"],
+  "references": []
+}

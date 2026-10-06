@@ -1,0 +1,92 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:AvaloniaPngEditor.Controls"
+        x:Class="AvaloniaPngEditor.Views.MainWindow"
+        Width="1100" Height="720"
+        Title="PNG Editor (Avalonia)">
+
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Ctrl+N" Command="{Binding NewCommand}" />
+        <KeyBinding Gesture="Ctrl+O" Command="{Binding OpenCommand}" />
+        <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveCommand}" />
+        <KeyBinding Gesture="Ctrl+Shift+S" Command="{Binding SaveAsCommand}" />
+        <KeyBinding Gesture="Ctrl+Q" Command="{Binding QuitCommand}" />
+    </Window.KeyBindings>
+
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_New" Command="{Binding NewCommand}" InputGesture="Ctrl+N" />
+                <MenuItem Header="_Open..." Command="{Binding OpenCommand}" InputGesture="Ctrl+O" />
+                <MenuItem Header="_Save" Command="{Binding SaveCommand}" InputGesture="Ctrl+S" />
+                <MenuItem Header="Save _As..." Command="{Binding SaveAsCommand}" InputGesture="Ctrl+Shift+S" />
+                <Separator />
+                <MenuItem Header="_Quit" Command="{Binding QuitCommand}" InputGesture="Ctrl+Q" />
+            </MenuItem>
+        </Menu>
+
+        <!-- Toolbar: mode + pen settings -->
+        <Border DockPanel.Dock="Top" Padding="6" BorderThickness="0,0,0,1" BorderBrush="#33888888">
+            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <TextBlock Text="Mode:" VerticalAlignment="Center" />
+                <ComboBox x:Name="ModeBox" Width="130" SelectedIndex="0" SelectionChanged="OnModeChanged">
+                    <ComboBoxItem>Path</ComboBoxItem>
+                    <ComboBoxItem>Circle</ComboBoxItem>
+                    <ComboBoxItem>Rectangle</ComboBoxItem>
+                </ComboBox>
+
+                <Button Content="Pen Color">
+                    <Button.Flyout>
+                        <Flyout>
+                            <WrapPanel Width="150">
+                                <Button Width="28" Height="28" Margin="2" Background="#000000" Tag="#000000" Click="OnColorSwatch" />
+                                <Button Width="28" Height="28" Margin="2" Background="#FFFFFF" Tag="#FFFFFF" Click="OnColorSwatch" />
+                                <Button Width="28" Height="28" Margin="2" Background="#E53935" Tag="#E53935" Click="OnColorSwatch" />
+                                <Button Width="28" Height="28" Margin="2" Background="#43A047" Tag="#43A047" Click="OnColorSwatch" />
+                                <Button Width="28" Height="28" Margin="2" Background="#1E88E5" Tag="#1E88E5" Click="OnColorSwatch" />
+                                <Button Width="28" Height="28" Margin="2" Background="#FDD835" Tag="#FDD835" Click="OnColorSwatch" />
+                                <Button Width="28" Height="28" Margin="2" Background="#FB8C00" Tag="#FB8C00" Click="OnColorSwatch" />
+                                <Button Width="28" Height="28" Margin="2" Background="#8E24AA" Tag="#8E24AA" Click="OnColorSwatch" />
+                            </WrapPanel>
+                        </Flyout>
+                    </Button.Flyout>
+                </Button>
+                <Border x:Name="ColorSwatch" Width="24" Height="24" BorderBrush="Gray" BorderThickness="1" />
+
+                <TextBlock Text="Radius:" VerticalAlignment="Center" />
+                <NumericUpDown x:Name="RadiusBox" Width="120" Minimum="1" Maximum="200"
+                               Increment="1" FormatString="0" Value="4" ValueChanged="OnRadiusChanged" />
+            </StackPanel>
+        </Border>
+
+        <!-- Metadata panel (spec Feature: Forms / Text Editing) -->
+        <Border DockPanel.Dock="Right" Width="320" Padding="8"
+                BorderThickness="1,0,0,0" BorderBrush="#33888888">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Text="PNG Text Metadata"
+                           FontWeight="Bold" Margin="0,0,0,8" />
+                <Button DockPanel.Dock="Bottom" Content="Add Field" Click="OnAddField"
+                        HorizontalAlignment="Left" Margin="0,8,0,0" />
+                <ScrollViewer>
+                    <ItemsControl ItemsSource="{Binding Entries}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnDefinitions="*,*,Auto" Margin="0,0,0,4">
+                                    <TextBox Grid.Column="0" Text="{Binding Key, Mode=TwoWay}" Watermark="key" />
+                                    <TextBox Grid.Column="1" Text="{Binding Value, Mode=TwoWay}" Watermark="value" Margin="4,0" />
+                                    <Button Grid.Column="2" Content="✕" Click="OnRemoveField" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <!-- Canvas -->
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+            <controls:CanvasControl x:Name="PaintCanvas"
+                                    HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </ScrollViewer>
+    </DockPanel>
+</Window>

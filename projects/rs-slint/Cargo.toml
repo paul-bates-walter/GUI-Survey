@@ -1,0 +1,37 @@
+[package]
+name = "png-editor-slint"
+version = "0.1.0"
+edition = "2021"
+description = "Desktop PNG editor built with the Slint GUI toolkit (Rust)"
+build = "build.rs"
+
+[[bin]]
+name = "png-editor-slint"
+path = "src/main.rs"
+
+# App logic is compiled as a library so it can be hot-reloaded: `rlib` lets the
+# host link the generated AppWindow/MetaRow types + AppState; `dylib` produces
+# the .so the running host dlopen's and swaps on rebuild (spec.md "Hot Swapping").
+[lib]
+name = "png_editor_slint"
+path = "src/lib.rs"
+crate-type = ["rlib", "dylib"]
+
+[dependencies]
+# GUI toolkit (default backend: winit + femtovg/OpenGL).
+slint = "1"
+# dlopen/dlsym wrapper: the host loads and reloads the app dylib through this.
+libloading = "0.8"
+# Native open/save file dialogs (blocking variant — dialogs are modal anyway).
+rfd = "0.15"
+# Pixel decode (normalizes palette / bit-depth to RGBA8).
+image = { version = "0.25", default-features = false, features = ["png"] }
+# Direct PNG encode + tEXt chunk read/write.
+png = "0.17"
+
+[build-dependencies]
+slint-build = "1"
+
+[profile.release]
+opt-level = 2
+strip = true

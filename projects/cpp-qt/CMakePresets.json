@@ -1,0 +1,29 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "host",
+      "displayName": "Host (Release)",
+      "description": "Native host build, Ninja + Release. Matches scripts/build.sh.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/cmake-host",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "host-debug",
+      "displayName": "Host (Debug)",
+      "description": "Native host build, Ninja + Debug.",
+      "inherits": "host",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "host", "configurePreset": "host" },
+    { "name": "host-debug", "configurePreset": "host-debug" }
+  ]
+}

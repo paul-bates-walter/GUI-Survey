@@ -1,0 +1,39 @@
+[package]
+name = "png-editor-egui"
+version = "0.1.0"
+edition = "2021"
+description = "Desktop PNG editor built with the egui/eframe GUI toolkit (Rust)"
+
+[[bin]]
+name = "png-editor-egui"
+path = "src/main.rs"
+
+# The app logic is compiled as a library so it can be hot-reloaded: `rlib` lets
+# the host binary link `AppState` + construct it, `dylib` produces the .so the
+# running host dlopen's and swaps on rebuild (spec.md "Hot Swapping").
+[lib]
+name = "png_editor_egui"
+path = "src/lib.rs"
+crate-type = ["rlib", "dylib"]
+
+[dependencies]
+# Immediate-mode GUI + native app shell. Default features keep the glow (GL)
+# backend and winit x11/wayland; we additionally enable "wgpu" and select it at
+# runtime (this repo's container has Vulkan but no working GL surface).
+eframe = { version = "0.29", features = ["wgpu"] }
+# The egui toolkit itself, used directly by the hot-reloadable lib (which does
+# not need the eframe app shell). Cargo unifies this with eframe's egui, so the
+# `&egui::Context` the host passes into the dylib is the same type on both sides.
+egui = "0.29"
+# dlopen/dlsym wrapper: the host loads and reloads the app dylib through this.
+libloading = "0.8"
+# Native open/save file dialogs (blocking — dialogs are modal anyway).
+rfd = "0.15"
+# Pixel decode (normalizes palette / bit-depth to RGBA8).
+image = { version = "0.25", default-features = false, features = ["png"] }
+# Direct PNG encode + tEXt chunk read/write.
+png = "0.17"
+
+[profile.release]
+opt-level = 2
+strip = true
